@@ -1,3 +1,5 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
+
 // setting.dto.ts
 interface SettingResponseDto {
     id: string
@@ -22,7 +24,7 @@ interface DeleteSettingDto {
 }
 
 // Filter
-interface SettingFilterDto {
+interface SettingFilterDto extends PaginationDto {
     id?: string
     year?: number
     keyword?: string

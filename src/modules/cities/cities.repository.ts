@@ -1,7 +1,7 @@
 // Talk to Database
 import { and, eq, ilike, isNotNull, isNull, or, sql } from 'drizzle-orm';
 import { db } from '../../config/db.js'
-import { withDeletedAt, withUpdatedAt } from '../../helper/model_helper.js';
+import { withDeletedAt, withUpdatedAt } from '../../helper/database_helper.js';
 import { CreateCityDto, CityFilterDto } from './cities.dto.js';
 import { CityTable } from '../../database/schemas/cities.js';
 
@@ -10,7 +10,7 @@ class CityRepository{
         const orConditions = [];
         const andConditions = [];
         
-        filters?.id && orConditions.push(eq(CityTable.id, filters.id));
+        filters?.id && andConditions.push(eq(CityTable.id, filters.id));
         filters?.name && orConditions.push(eq(CityTable.name, filters.name.trim().toLowerCase()));
 
         if(filters?.keyword){
@@ -24,7 +24,7 @@ class CityRepository{
         // By default, only return non-deleted cities. If deleted filter is provided, override the default behavior
         filters?.deleted !== undefined ? andConditions.push(isNull(CityTable.deletedAt)) : (filters?.deleted ? andConditions.push(isNotNull(CityTable.deletedAt)) : andConditions.push(isNull(CityTable.deletedAt)))
 
-        return await db.select().from(CityTable).where(and(...andConditions)).orderBy(CityTable.name);
+        return await db.select().from(CityTable).where(and(...andConditions)).orderBy(CityTable.name).limit(filters?.limit as number).offset(filters?.offset as number);
     }
 
     async createCity(req: CreateCityDto){

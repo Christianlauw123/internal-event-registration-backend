@@ -1,9 +1,9 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
 import { CompanyResponseDto } from "../company/company.dto.js"
 import { ParticipantResponseDto } from "../participant/participant.dto.js"
 
 // company_owner.dto.ts
 interface CompanyOwnerResponseDto {
-    id: string
     company?: CompanyResponseDto
     owners?: ParticipantResponseDto [] | null
     deletedAt?: Date | null
@@ -12,6 +12,7 @@ interface CompanyOwnerResponseDto {
 interface CreateCompanyOwnerDto {
     companyId: string
     participantIds: string[]
+    year: number
 }
 
 interface DeleteCompanyOwnerDto {
@@ -19,9 +20,10 @@ interface DeleteCompanyOwnerDto {
     participantIds: string[]
 }
 
-interface CompanyOwnerFilterDto {
-  companyId?: string
-  deleted?: boolean
+interface CompanyOwnerFilterDto extends PaginationDto {
+    companyId?: string
+    deleted?: boolean
+    year?: number
 }
 
 export {

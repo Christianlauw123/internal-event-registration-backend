@@ -4,6 +4,8 @@ import type { Request, Response } from "express";
 import { baseResponse } from "../../helper/response_helper.js";
 import { CreateParticipantDto, DeleteParticipantDto, ParticipantFilterDto, UpdateParticipantDto } from "./participant.dto.js";
 import { ParticipantService } from "./participant.service.js";
+import { activeYearFilter } from "../../helper/model_helper.js";
+import { extractPagination } from "../../helper/pagination_helper.js";
 
 const participantService = new ParticipantService()
 
@@ -13,7 +15,9 @@ async function findAllParticipants(req: Request, res: Response){
         ...(req.query.keyword && { keyword: req.query.keyword as string }),
         ...(req.query.isMandarin !== undefined && { isMandarin: req.query.isMandarin === "true" }),
         ...(req.query.shioId && { shioId: req.query.shioId as string }),
-        ...(req.query.deleted !== undefined && { deleted: req.query.deleted === "true" })
+        ...(req.query.deleted !== undefined && { deleted: req.query.deleted === "true" }),
+        ...extractPagination(req.query),
+        year: await activeYear()
     }
 
     const response = await participantService.findAllParticipants(requestBody)
@@ -27,6 +31,7 @@ async function createParticipant(req: Request, res: Response){
     const requestBody: CreateParticipantDto = {
         name: req.body.name,
         isMandarin: req.body.isMandarin,
+        year: await activeYear(),
         shioId: req.body.shioId
     }
 
@@ -53,6 +58,12 @@ async function deleteParticipant(req: Request, res: Response){
 
     const response = await participantService.deleteParticipant(requestBody)
     return res.status(201).json(baseResponse("Participant deleted", null, [response]))
+}
+
+// private function to get active year, since we need to use it in multiple places in the controller
+async function activeYear(){
+    const activeYear = await activeYearFilter();
+    return activeYear?.year as number
 }
 
 export{

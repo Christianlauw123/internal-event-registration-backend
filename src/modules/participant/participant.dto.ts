@@ -1,3 +1,4 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
 import { ShioResponseDto } from "../shios/shios.dto.js"
 
 // participant.dto.ts
@@ -11,6 +12,7 @@ interface ParticipantResponseDto {
 interface CreateParticipantDto {
     name: string
     isMandarin: boolean
+    year: number
     shioId: string
 }
 
@@ -26,13 +28,14 @@ interface DeleteParticipantDto {
 }
 
 // Filter
-interface ParticipantFilterDto {
+interface ParticipantFilterDto extends PaginationDto {
     id?: string
     name?: string
     keyword?: string
     isMandarin?: boolean
     shioId?: string
     deleted?: boolean
+    year?: number
 }
 
 export {

@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { baseResponse } from "../../helper/response_helper.js";
 import { CreateSettingDto, DeleteSettingDto, SettingFilterDto, UpdateSettingDto } from "./setting.dto.js";
 import { SettingService } from "./setting.service.js";
+import { extractPagination } from "../../helper/pagination_helper.js";
 
 const settingService = new SettingService()
 
@@ -12,6 +13,7 @@ async function findAllSettings(req: Request, res: Response){
         ...(req.query.id && { id: req.query.id as string }),
         ...(req.query.keyword && { keyword: req.query.keyword as string }),
         ...(req.query.deleted !== undefined && { deleted: req.query.deleted === "true" })
+        ...extractPagination(req.query),
     }
 
     const response = await settingService.findAllSettings(requestBody)

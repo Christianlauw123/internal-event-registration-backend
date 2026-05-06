@@ -12,7 +12,8 @@ class UserRepository{
         const andConditions = [];
 
         // id priority
-        filters?.id && orConditions.push(eq(UserTable.id, filters.id));
+        filters?.id && andConditions.push(eq(UserTable.id, filters.id));
+        
         filters?.email && orConditions.push(eq(UserTable.email, filters.email));
         if(filters?.keyword){
             orConditions.push(ilike(UserTable.name, `%${filters.keyword}%`));

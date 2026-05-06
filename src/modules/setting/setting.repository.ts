@@ -2,7 +2,7 @@
 // Talk to Database
 import { and, eq, ilike, isNotNull, isNull, ne, or } from 'drizzle-orm';
 import { db } from '../../config/db.js'
-import { withDeletedAt, withUpdatedAt } from '../../helper/model_helper.js';
+import { withDeletedAt, withUpdatedAt } from '../../helper/database_helper.js';
 import { CreateSettingDto, SettingFilterDto } from './setting.dto.js';
 import { SettingTable } from '../../database/schemas/settings.js';
 
@@ -11,7 +11,7 @@ class SettingRepository{
         const orConditions = [];
         const andConditions = [];
 
-        filters?.id && orConditions.push(eq(SettingTable.id, filters.id));
+        filters?.id && andConditions.push(eq(SettingTable.id, filters.id));
         filters?.year && orConditions.push(eq(SettingTable.year, filters.year));
 
         if(filters?.keyword){
@@ -25,7 +25,7 @@ class SettingRepository{
         // By default, only return non-deleted settings. If deleted filter is provided, override the default behavior
         filters?.deleted !== undefined ? andConditions.push(isNull(SettingTable.deletedAt)) : (filters?.deleted ? andConditions.push(isNotNull(SettingTable.deletedAt)) : andConditions.push(isNull(SettingTable.deletedAt)))
 
-        return await db.select().from(SettingTable).where(and(...andConditions)).orderBy(SettingTable.year);
+        return await db.select().from(SettingTable).where(and(...andConditions)).orderBy(SettingTable.year).limit(filters?.limit as number).offset(filters?.offset as number);
     }
 
     async createSetting(req: CreateSettingDto){
@@ -44,6 +44,10 @@ class SettingRepository{
     async settingActivation(activeSettingId: string){
         // Goal: deactivate all other settings
         return await db.update(SettingTable).set({ isActive: false }).where(ne(SettingTable.id, activeSettingId)).returning();
+    }
+
+    async findActiveSetting(){
+        return await db.select().from(SettingTable).where(and(eq(SettingTable.isActive, true), isNull(SettingTable.deletedAt))).orderBy(SettingTable.year).limit(1);
     }
 }
 

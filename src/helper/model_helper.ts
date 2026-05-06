@@ -1,28 +1,27 @@
 import { validate as uuidValidate } from "uuid";
 import { BadRequestError } from "./app_error_helper.js";
 
-function withUpdatedAt<T>(data: T): T & { updatedAt: Date } {
-  return {
-    ...data,
-    updatedAt: new Date(),
-  };
-}
+import { SettingRepository } from "../modules/setting/setting.repository.js";
+import { SettingResponseDto } from "../modules/setting/setting.dto.js";
 
-function withDeletedAt<T>(data: T): T & { deletedAt: Date } {
-  return {
-    ...data,
-    deletedAt: new Date(),
-  };
-}
+const settingRepo = new SettingRepository();
 
+// Validator for UUID format
 function uuidValidator(id: string) {
   if (!uuidValidate(id)){
     throw new BadRequestError("Invalid ID");
   }
 }
 
+async function activeYearFilter(): Promise<SettingResponseDto> {
+  const activeYear = await settingRepo.findActiveSetting()
+  if(!activeYear || activeYear.length === 0){
+    throw new BadRequestError("No active year found");
+  }
+  return activeYear[0] || null;
+}
+
 export {
-    withUpdatedAt,
-    withDeletedAt,
-    uuidValidator
+    uuidValidator,
+    activeYearFilter
 }

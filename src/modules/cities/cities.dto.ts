@@ -1,3 +1,5 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
+
 // city.dto.ts
 interface CityResponseDto {
     id: string
@@ -19,7 +21,7 @@ interface DeleteCityDto {
 }
 
 // Filter
-interface CityFilterDto {
+interface CityFilterDto extends PaginationDto {
     id?: string
     keyword?: string
     name?: string

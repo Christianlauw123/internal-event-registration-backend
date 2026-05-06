@@ -5,6 +5,8 @@ import { shioRouter } from './v1/shios.routes.js'
 import { settingRouter } from './v1/setting.routes.js'
 import { participantRouter } from './v1/participant.routes.js'
 import { companyRouter } from './v1/company.routes.js'
+import { companyOwnerRouter } from './v1/company_owner.routes.js'
+import { transactionRouter } from './v1/transaction.routes.js'
 
 const router = express.Router()
 
@@ -14,7 +16,8 @@ router.use('/shios', shioRouter)
 router.use('/settings', settingRouter)
 router.use('/participants', participantRouter)
 router.use('/companies', companyRouter)
-
+router.use('/company-owners', companyOwnerRouter)
+router.use('/transactions',transactionRouter)
 export {
     router as v1Router
 }

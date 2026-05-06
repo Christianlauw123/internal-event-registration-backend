@@ -1,3 +1,4 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
 import { CityResponseDto } from "../cities/cities.dto.js"
 
 // company.dto.ts
@@ -11,6 +12,7 @@ interface CompanyResponseDto {
 interface CreateCompanyDto {
     name: string
     address: string
+    year?: number
     cityId: string
 }
 
@@ -26,11 +28,12 @@ interface DeleteCompanyDto {
 }
 
 // Filter
-interface CompanyFilterDto {
+interface CompanyFilterDto extends PaginationDto {
     id?: string
     name?: string
     keyword?: string
     cityId?: string
+    year?: number
     deleted?: boolean
 }
 

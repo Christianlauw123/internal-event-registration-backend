@@ -3,7 +3,7 @@ import { and, eq, ilike, isNotNull, isNull, or } from 'drizzle-orm';
 import { db } from '../../config/db.js';
 import { ParticipantTable } from '../../database/schemas/participants.js';
 import { CreateParticipantDto, ParticipantFilterDto } from './participant.dto.js';
-import { withDeletedAt, withUpdatedAt } from '../../helper/model_helper.js';
+import { withDeletedAt, withUpdatedAt } from '../../helper/database_helper.js';
 import { ShioTable } from '../../database/schemas/shios.js';
 
 class ParticipantRepository{
@@ -11,7 +11,7 @@ class ParticipantRepository{
         const orConditions = [];
         const andConditions = [];
 
-        filters?.id && orConditions.push(eq(ParticipantTable.id, filters.id));
+        filters?.id && andConditions.push(eq(ParticipantTable.id, filters.id));
         filters?.name && orConditions.push(eq(ParticipantTable.name, filters.name.trim().toLowerCase()));
         
         if(filters?.keyword){
@@ -28,6 +28,8 @@ class ParticipantRepository{
         // By default, only return non-deleted participants. If deleted filter is provided, override the default behavior
         filters?.deleted !== undefined ? andConditions.push(isNull(ParticipantTable.deletedAt)) : (filters?.deleted ? andConditions.push(isNotNull(ParticipantTable.deletedAt)) : andConditions.push(isNull(ParticipantTable.deletedAt)))
 
+        filters?.year && andConditions.push(eq(ParticipantTable.year, filters.year));
+
         return await db.select({
           id: ParticipantTable.id,
           name: ParticipantTable.name,
@@ -35,7 +37,7 @@ class ParticipantRepository{
           shioId: ShioTable.id,
           indonesianShio: ShioTable.indonesianShio,
           mandarinShio: ShioTable.mandarinShio,
-        }).from(ParticipantTable).leftJoin(ShioTable, eq(ParticipantTable.shioId, ShioTable.id)).where(and(...andConditions)).orderBy(ParticipantTable.name);
+        }).from(ParticipantTable).leftJoin(ShioTable, eq(ParticipantTable.shioId, ShioTable.id)).where(and(...andConditions)).orderBy(ParticipantTable.name).limit(filters?.limit as number).offset(filters?.offset as number);
     }
 
     async createParticipant(req: CreateParticipantDto){

@@ -4,6 +4,7 @@ import type { Request, Response } from "express";
 import { ShioService } from "./shios.service.js";
 import { baseResponse } from "../../helper/response_helper.js";
 import { CreateShioDto, DeleteShioDto, UpdateShioDto, ShioFilterDto } from "./shios.dto.js";
+import { extractPagination } from "../../helper/pagination_helper.js";
 
 const shioService = new ShioService()
 
@@ -12,6 +13,7 @@ async function findAllShios(req: Request, res: Response){
         ...(req.query.id && { id: req.query.id as string }),
         ...(req.query.indonesianShio && { indonesianShio: req.query.indonesianShio as string }),
         ...(req.query.mandarinShio && { mandarinShio: req.query.mandarinShio as string })
+        ...extractPagination(req.query),
     }
 
     const response = await shioService.findAllShios(requestBody)

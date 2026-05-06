@@ -3,6 +3,8 @@ import { Request, Response } from 'express';
 import { CompanyService } from './company.service.js';
 import { baseResponse } from '../../helper/response_helper.js';
 import { CompanyFilterDto, CreateCompanyDto, DeleteCompanyDto, UpdateCompanyDto } from './company.dto.js';
+import { activeYearFilter } from '../../helper/model_helper.js';
+import { extractPagination } from '../../helper/pagination_helper.js';
 
 const companyService = new CompanyService();
 
@@ -11,7 +13,9 @@ async function findAllCompanies(req: Request, res: Response){
         ...(req.query.id && { id: req.query.id as string }),
         ...(req.query.keyword && { keyword: req.query.keyword as string }),
         ...(req.query.cityId && { cityId: req.query.cityId as string }),
-        ...(req.query.deleted !== undefined && { deleted: req.query.deleted === "true" })
+        ...(req.query.deleted !== undefined && { deleted: req.query.deleted === "true" }),
+        ...extractPagination(req.query),
+        year: await activeYear()
     }
 
     const response = await companyService.findAllCompanies(requestBody)
@@ -22,10 +26,12 @@ async function findAllCompanies(req: Request, res: Response){
 }
 
 async function createCompany(req: Request, res: Response){
+    
     const requestBody: CreateCompanyDto = {
         name: req.body.name,
         address: req.body.address,
-        cityId: req.body.cityId
+        cityId: req.body.cityId,
+        year: await activeYear()
     }
 
     const response = await companyService.createCompany(requestBody)
@@ -51,6 +57,12 @@ async function deleteCompany(req: Request, res: Response){
 
     const response = await companyService.deleteCompany(requestBody)
     return res.status(201).json(baseResponse("Company deleted", null, [response]))
+}
+
+// private function to get active year, since we need to use it in multiple places in the controller
+async function activeYear(){
+    const activeYear = await activeYearFilter();
+    return activeYear?.year as number
 }
 
 export {

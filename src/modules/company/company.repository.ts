@@ -2,7 +2,7 @@
 // Talk to Database
 import { and, eq, ilike, isNotNull, isNull, or } from 'drizzle-orm';
 import { db } from '../../config/db.js'
-import { withDeletedAt, withUpdatedAt } from '../../helper/model_helper.js';
+import { withDeletedAt, withUpdatedAt } from '../../helper/database_helper.js';
 import { CompanyFilterDto, CreateCompanyDto } from './company.dto.js';
 import { CityTable } from '../../database/schemas/cities.js';
 import { CompanyTable } from '../../database/schemas/companies.js';
@@ -13,7 +13,8 @@ class CompanyRepository{
         const orConditions = [];
         const andConditions = [];
         
-        filters?.id && orConditions.push(eq(CompanyTable.id, filters.id));
+        filters?.id && andConditions.push(eq(CompanyTable.id, filters.id));
+        
         filters?.cityId && orConditions.push(eq(CompanyTable.cityId, filters.cityId));
         filters?.name && orConditions.push(eq(CompanyTable.name, filters.name.trim().toLowerCase()));
 
@@ -27,6 +28,7 @@ class CompanyRepository{
 
         // By default, only return non-deleted cities. If deleted filter is provided, override the default behavior
         filters?.deleted !== undefined ? andConditions.push(isNull(CompanyTable.deletedAt)) : (filters?.deleted ? andConditions.push(isNotNull(CompanyTable.deletedAt)) : andConditions.push(isNull(CityTable.deletedAt)))
+        filters?.year && andConditions.push(eq(CompanyTable.year, filters.year));
 
         return await db.select({
           id: CompanyTable.id,
@@ -34,7 +36,7 @@ class CompanyRepository{
           address: CompanyTable.address,
           cityId: CityTable.id,
           cityName: CityTable.name
-        }).from(CompanyTable).leftJoin(CityTable,eq(CompanyTable.cityId,CityTable.id)).where(and(...andConditions)).orderBy(CityTable.name);
+        }).from(CompanyTable).leftJoin(CityTable,eq(CompanyTable.cityId,CityTable.id)).where(and(...andConditions)).orderBy(CityTable.name).limit(filters?.limit as number).offset(filters?.offset as number);
     }
 
     async createCompany(req: CreateCompanyDto){

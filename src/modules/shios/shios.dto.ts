@@ -1,3 +1,5 @@
+import { PaginationDto } from "../../helper/pagination_helper.js"
+
 // Shio.dto.ts
 interface ShioResponseDto {
     id: string
@@ -22,7 +24,7 @@ interface DeleteShioDto {
 }
 
 // Filter
-interface ShioFilterDto {
+interface ShioFilterDto extends PaginationDto {
     id?: string
     keyword?: string
     deleted?: boolean
